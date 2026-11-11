@@ -3,274 +3,451 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0d0d0d">
-<title>HHAI — Умный помощник</title>
+<meta name="theme-color" content="#212121">
+<title>HHAI</title>
 <style>
   :root {
-    --bg: #0d0d0d; --panel: #171717; --panel-2: #212121;
-    --user-bubble: #2f2f2f; --text: #ececec; --muted: #8e8e8e;
-    --accent: #10a37f; --border: #2a2a2a;
-    --code-bg: #1e1e1e; --code-border: #333;
+    --bg: #212121;
+    --sidebar-bg: #171717;
+    --surface-1: #2f2f2f;
+    --surface-2: #303030;
+    --surface-3: #3a3a3a;
+    --user-bubble: #303030;
+    --text: #ececec;
+    --text-dim: #b4b4b4;
+    --muted: #8e8e8e;
+    --accent: #ececec;
+    --accent-on: #212121;
+    --border: #2f2f2f;
+    --border-light: #3a3a3a;
+    --danger: #ff6b6b;
+    --warn: #ffb84d;
+    --code-bg: #0d0d0d;
+    --code-border: #2f2f2f;
+    --radius-xl: 26px;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
   }
   body.light-theme {
-    --bg: #ffffff; --panel: #f7f7f8; --panel-2: #ececec;
-    --user-bubble: #e5e5ea; --text: #000000; --muted: #666666;
-    --border: #d1d1d6; --code-bg: #f4f4f4; --code-border: #ddd;
+    --bg: #ffffff;
+    --sidebar-bg: #f9f9f9;
+    --surface-1: #f4f4f4;
+    --surface-2: #ececec;
+    --surface-3: #e0e0e0;
+    --user-bubble: #f4f4f4;
+    --text: #0d0d0d;
+    --text-dim: #5d5d5d;
+    --muted: #8e8e8e;
+    --accent: #0d0d0d;
+    --accent-on: #ffffff;
+    --border: #ececec;
+    --border-light: #e0e0e0;
+    --code-bg: #f7f7f7;
+    --code-border: #ececec;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
-    margin: 0; padding: 0; height: 100%; background: var(--bg);
-    color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    font-size: 16px; overflow: hidden; transition: background 0.3s, color 0.3s;
+    margin: 0; padding: 0; height: 100%;
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    font-size: 16px; overflow: hidden;
+    transition: background 0.25s, color 0.25s;
   }
 
   .header {
     position: fixed; top: 0; left: 0; right: 0;
-    height: calc(56px + env(safe-area-inset-top));
+    height: calc(52px + env(safe-area-inset-top));
     padding-top: env(safe-area-inset-top);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 16px; background: rgba(13,13,13,0.85);
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border); z-index: 20;
+    display: flex; align-items: center; gap: 2px;
+    padding-left: 6px; padding-right: 6px;
+    background: var(--bg);
+    z-index: 20;
   }
-  body.light-theme .header { background: rgba(255,255,255,0.85); }
-  
-  .menu-btn { background: none; border: none; color: var(--text); font-size: 24px; cursor: pointer; padding: 4px 8px; }
-  .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; }
-  .header-btn { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; }
+  .header .spacer { flex: 1; }
+
+  .icon-btn {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: transparent; border: none; color: var(--text);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .icon-btn:hover { background: var(--surface-2); }
+  .icon-btn:active { background: var(--surface-3); }
+
+  .plus-btn {
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+  }
+  .plus-btn:hover { border-color: var(--muted); }
+
+  .header-title {
+    font-size: 15px; font-weight: 600;
+    color: var(--text); padding: 0 8px;
+    letter-spacing: 0.1px;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+  }
 
   .sidebar {
-    position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
-    background: var(--panel); z-index: 50;
-    transition: left 0.3s ease; padding-top: env(safe-area-inset-top);
-    display: flex; flex-direction: column; border-right: 1px solid var(--border);
+    position: fixed; top: 0; left: 0; width: 300px; height: 100%;
+    background: var(--sidebar-bg); z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(.2,.8,.2,1);
+    padding-top: env(safe-area-inset-top);
+    display: flex; flex-direction: column;
   }
-  .sidebar.open { left: 0; }
+  .sidebar.open { transform: translateX(0); }
   .sidebar-overlay {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    position: fixed; inset: 0;
     background: rgba(0,0,0,0.5); z-index: 40;
-    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    opacity: 0; pointer-events: none; transition: opacity 0.28s;
   }
   .sidebar-overlay.show { opacity: 1; pointer-events: auto; }
-  
-  .sidebar-header { padding: 16px; border-bottom: 1px solid var(--border); }
-  .new-chat-btn {
-    width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
-    background: transparent; color: var(--text); font-size: 15px; font-weight: 600;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .new-chat-btn:active { background: var(--panel-2); }
-  
-  .chat-list { flex: 1; overflow-y: auto; padding: 8px; }
+
+  .chat-list { flex: 1; overflow-y: auto; padding: 12px 10px; }
   .chat-item {
-    padding: 12px; border-radius: 8px; margin-bottom: 4px;
-    cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-    font-size: 14px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    padding: 14px 16px; border-radius: 10px;
+    margin-bottom: 4px; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 15px;
+    color: var(--text);
+    transition: background 0.15s;
+    gap: 10px;
   }
-  .chat-item:hover, .chat-item.active { background: var(--panel-2); }
+  .chat-item:hover { background: var(--surface-2); }
+  .chat-item.active { background: var(--surface-3); font-weight: 500; }
+  .chat-item .title {
+    flex: 1; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .chat-item .delete-chat {
-    color: var(--muted); background: none; border: none; font-size: 12px; cursor: pointer;
-    display: none; padding: 2px 6px; border-radius: 4px;
+    color: var(--muted); background: none; border: none;
+    font-size: 18px; cursor: pointer; padding: 2px 6px;
+    border-radius: 6px; display: none; line-height: 1;
   }
   .chat-item:hover .delete-chat { display: block; }
+  .chat-item .delete-chat:hover { background: var(--surface-3); color: var(--danger); }
 
-  .sidebar-footer { padding: 16px; border-top: 1px solid var(--border); }
-  .sidebar-footer button {
-    width: 100%; padding: 10px; background: transparent; border: none;
-    color: var(--text); font-size: 15px; cursor: pointer; text-align: left;
-    display: flex; align-items: center; gap: 8px;
+  .sidebar-footer {
+    padding: 12px 10px calc(16px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
   }
+  .sidebar-footer button {
+    width: 100%; padding: 14px 16px; background: transparent;
+    border: none; color: var(--text); font-size: 15px;
+    cursor: pointer; text-align: left; display: flex;
+    align-items: center; gap: 10px; border-radius: 10px;
+    transition: background 0.15s;
+  }
+  .sidebar-footer button:hover { background: var(--surface-2); }
 
   .messages {
-    position: absolute; top: calc(56px + env(safe-area-inset-top));
-    bottom: calc(120px + env(safe-area-inset-bottom));
-    left: 0; right: 0; overflow-y: auto; padding: 16px 12px 8px;
+    position: absolute;
+    top: calc(52px + env(safe-area-inset-top));
+    bottom: calc(170px + env(safe-area-inset-bottom));
+    left: 0; right: 0; overflow-y: auto;
+    padding: 20px 16px 8px;
     -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
-  .row { display: flex; margin-bottom: 18px; animation: fadeIn 0.2s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  
+  .welcome-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    color: var(--text);
+    padding: 0 20px;
+    animation: fadeIn 0.4s ease;
+  }
+  .welcome-screen h1 {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    background: linear-gradient(90deg, #ececec, #a0a0a0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  body.light-theme .welcome-screen h1 {
+    background: linear-gradient(90deg, #0d0d0d, #5d5d5d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .welcome-screen p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    max-width: 400px;
+    margin: 0;
+  }
+
+  .row {
+    display: flex; margin-bottom: 24px;
+    animation: fadeIn 0.2s ease;
+    gap: 10px;
+    align-items: flex-start;
+    position: relative;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
   .row.user { justify-content: flex-end; }
   .row.bot { justify-content: flex-start; }
+
+  .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--surface-3);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text); font-size: 12px; font-weight: 600;
+    flex-shrink: 0; margin-top: 2px;
+  }
+
   .bubble {
-    max-width: 82%; padding: 10px 14px; border-radius: 18px;
-    line-height: 1.45; font-size: 15.5px; word-wrap: break-word; white-space: pre-wrap;
-    position: relative;
+    max-width: 85%; padding: 12px 16px;
+    border-radius: var(--radius-xl); line-height: 1.65;
+    font-size: 16.5px; word-wrap: break-word; white-space: pre-wrap;
+    position: relative; cursor: pointer;
+    transition: background 0.15s;
   }
-  .row.user .bubble { background: var(--user-bubble); border-bottom-right-radius: 6px; }
-  .row.bot .bubble { background: transparent; padding-left: 0; padding-top: 2px; max-width: 88%; }
-  
-  .model-tag {
-    font-size: 10px; color: var(--accent); font-weight: 600;
-    margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;
+  .row.user .bubble {
+    background: var(--user-bubble);
+    border-bottom-right-radius: 6px;
   }
+  .row.bot .bubble {
+    background: transparent; padding: 3px 0 0; max-width: 92%;
+    line-height: 1.7;
+  }
+
+  .msg-actions {
+    display: none;
+    gap: 6px; margin-top: 10px;
+    flex-wrap: wrap; align-items: center;
+  }
+  .msg-actions.visible { display: flex; }
+
+  .action-btn {
+    background: transparent; border: 1px solid var(--border-light);
+    color: var(--text-dim); padding: 5px 11px;
+    border-radius: 999px; font-size: 12px; cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    line-height: 1.2;
+  }
+  .action-btn:hover { background: var(--surface-2); color: var(--text); }
+  .action-btn:active { background: var(--surface-3); }
 
   .code-block {
     background: var(--code-bg); border: 1px solid var(--code-border);
-    border-radius: 8px; margin: 10px 0; overflow: hidden; position: relative;
+    border-radius: var(--radius-md); margin: 14px 0;
+    overflow: hidden; position: relative;
   }
   .code-header {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 6px 12px; background: rgba(0,0,0,0.1); border-bottom: 1px solid var(--code-border);
+    padding: 8px 14px; background: var(--surface-2);
+    border-bottom: 1px solid var(--code-border);
     font-size: 12px; color: var(--muted);
+    font-family: monospace;
   }
-  body.light-theme .code-header { background: rgba(0,0,0,0.05); }
   .code-header button {
-    background: var(--panel); border: 1px solid var(--border); border-radius: 4px;
-    color: var(--text); font-size: 11px; padding: 4px 8px; cursor: pointer;
-    display: flex; align-items: center; gap: 4px;
+    background: transparent; border: 1px solid var(--border-light);
+    border-radius: 6px; color: var(--text);
+    font-size: 11px; padding: 4px 10px; cursor: pointer;
+    transition: background 0.15s;
   }
-  .code-header button:active { background: var(--accent); color: #fff; }
+  .code-header button:hover { background: var(--surface-3); }
   .code-content {
-    padding: 12px; overflow-x: auto; font-family: monospace; font-size: 13px;
-    line-height: 1.4; color: #d4d4d4; white-space: pre;
+    padding: 14px; overflow-x: auto;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px; line-height: 1.55;
+    color: #d4d4d4; white-space: pre;
   }
-  body.light-theme .code-content { color: #333; }
+  body.light-theme .code-content { color: #2a2a2a; }
 
-  .bubble img { 
-    max-width: 100%; border-radius: 12px; margin-top: 8px; display: block; 
-    cursor: pointer; transition: opacity 0.2s;
+  .bubble img {
+    max-width: 100%; border-radius: var(--radius-md);
+    margin-top: 8px; display: block; cursor: pointer;
+    transition: opacity 0.2s;
   }
-  .bubble img:active { opacity: 0.7; }
-  .img-hint { font-size: 11px; color: var(--muted); margin-top: 4px; text-align: center; }
-
-  .msg-copy-btn {
-    margin-top: 8px; background: var(--panel-2); border: 1px solid var(--border);
-    color: var(--muted); padding: 4px 8px; border-radius: 6px; font-size: 11px;
-    cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+  .bubble img:hover { opacity: 0.92; }
+  .img-hint {
+    font-size: 11px; color: var(--muted);
+    margin-top: 6px; text-align: center;
   }
-  .msg-copy-btn:active { background: var(--accent); color: #fff; }
 
-  .typing { display: inline-flex; gap: 4px; padding: 12px 0; }
+  .typing { display: inline-flex; gap: 5px; padding: 14px 4px; }
   .typing span {
-    width: 7px; height: 7px; border-radius: 50%; background: var(--muted);
-    animation: blink 1.2s infinite;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--text-dim); opacity: 0.5;
+    animation: blink 1.3s infinite;
   }
-  .typing span:nth-child(2) { animation-delay: 0.2s; }
-  .typing span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes blink { 0%, 80%, 100% { opacity: 0.25; } 40% { opacity: 1; } }
-  
+  .typing span:nth-child(2) { animation-delay: 0.18s; }
+  .typing span:nth-child(3) { animation-delay: 0.36s; }
+  @keyframes blink {
+    0%, 80%, 100% { opacity: 0.25; transform: scale(0.9); }
+    40% { opacity: 1; transform: scale(1.1); }
+  }
+
+  .edit-area {
+    width: 100%; background: var(--surface-2);
+    border: 1px solid var(--border-light); border-radius: var(--radius-md);
+    color: var(--text); font-size: 16.5px; font-family: inherit;
+    padding: 10px 12px; resize: vertical;
+    min-height: 60px; outline: none; line-height: 1.55;
+  }
+  .edit-actions { display: flex; gap: 8px; margin-top: 8px; }
+
   .bottom-panel {
     position: fixed; bottom: 0; left: 0; right: 0;
-    padding: 4px 12px calc(8px + env(safe-area-inset-bottom));
-    background: linear-gradient(to top, var(--bg) 70%, rgba(13,13,13,0));
+    padding: 0 16px calc(6px + env(safe-area-inset-bottom));
+    background: var(--bg);
     z-index: 10;
+    display: flex; flex-direction: column; align-items: center;
   }
-  body.light-theme .bottom-panel { background: linear-gradient(to top, var(--bg) 70%, rgba(255,255,255,0)); }
 
   .status-line {
-    height: 24px; display: flex; align-items: center; justify-content: center;
-    font-size: 12px; color: var(--accent); font-weight: 500;
-    opacity: 0; transition: opacity 0.3s; margin-bottom: 4px; text-align: center;
+    height: 20px; display: flex; align-items: center; justify-content: center;
+    font-size: 11.5px; color: var(--text-dim); font-weight: 500;
+    opacity: 0; transition: opacity 0.3s;
+    width: 100%; max-width: 720px;
   }
   .status-line.show { opacity: 1; }
+  .status-line.error { color: var(--danger); opacity: 1; }
   .status-line .spinner-small {
-    width: 12px; height: 12px; border: 2px solid rgba(16, 163, 127, 0.3);
-    border-top-color: var(--accent); border-radius: 50%;
+    width: 10px; height: 10px;
+    border: 2px solid var(--surface-3);
+    border-top-color: var(--text-dim);
+    border-radius: 50%;
     animation: spin 0.8s linear infinite; margin-right: 6px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .mode-buttons { display: flex; gap: 8px; margin-bottom: 6px; padding-left: 4px; flex-wrap: wrap; }
-  .mode-btn {
-    background: var(--panel-2); border: 1px solid var(--border); color: var(--muted);
-    font-size: 12px; padding: 6px 12px; border-radius: 16px; cursor: pointer;
-    display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+  .tools-panel {
+    width: 100%; max-width: 720px;
+    margin-bottom: 6px; display: flex; gap: 8px;
   }
-  .mode-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tool-btn {
+    background: transparent; border: 1px solid var(--border-light);
+    color: var(--text-dim); padding: 6px 14px;
+    border-radius: 999px; font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    transition: all 0.15s;
+  }
+  .tool-btn:hover { background: var(--surface-2); color: var(--text); }
+  .tool-btn.active {
+    background: var(--accent); color: var(--accent-on);
+    border-color: var(--accent);
+  }
+  .tool-btn.disabled {
+    opacity: 0.5; cursor: not-allowed;
+  }
+  .tool-btn svg { width: 14px; height: 14px; }
 
   .composer-inner {
-    display: flex; align-items: flex-end; gap: 8px;
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 24px; padding: 6px 6px 6px 16px;
+    display: flex; align-items: flex-end; gap: 4px;
+    background: var(--surface-2);
+    border-radius: var(--radius-xl);
+    padding: 6px 6px 6px 18px;
+    width: 100%; max-width: 720px;
+    transition: opacity 0.3s, background 0.3s;
   }
+  .composer-inner.disabled {
+    background: var(--surface-1);
+  }
+  .composer-inner.disabled .composer-btn {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
   #input {
     flex: 1; background: transparent; border: none; outline: none;
-    color: var(--text); font-size: 16px; resize: none; max-height: 100px;
-    padding: 8px 0; font-family: inherit;
+    color: var(--text); font-size: 16px; resize: none;
+    max-height: 120px; padding: 10px 0;
+    font-family: inherit; line-height: 1.5;
+    transition: color 0.3s;
   }
   #input::placeholder { color: var(--muted); }
-  .send-btn {
-    width: 38px; height: 38px; border-radius: 50%; border: none;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; flex-shrink: 0; font-size: 18px;
-  }
-  .send-btn { background: var(--accent); color: #fff; transition: transform 0.1s; }
-  .send-btn:active { transform: scale(0.92); }
-  .send-btn:disabled { background: var(--panel-2); color: var(--muted); }
-  .send-btn svg { width: 18px; height: 18px; }
-
-  .modal {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.5); z-index: 100;
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none; transition: opacity 0.3s;
-  }
-  .modal.show { opacity: 1; pointer-events: auto; }
-  .modal-content {
-    background: var(--panel); width: 90%; max-width: 400px;
-    border-radius: 16px; padding: 20px; border: 1px solid var(--border);
-    transform: translateY(20px); transition: transform 0.3s;
-    max-height: 85vh; overflow-y: auto;
-  }
-  .modal.show .modal-content { transform: translateY(0); }
-  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
-  .setting-item { margin-bottom: 16px; }
-  .setting-label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 8px; }
-  .setting-options { display: flex; gap: 8px; }
-  .setting-options button {
-    flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border);
-    background: transparent; color: var(--text); cursor: pointer; font-size: 14px;
-  }
-  .setting-options button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
   
-  .modal-close {
-    width: 100%; padding: 12px; margin-top: 12px; border-radius: 8px;
-    border: none; background: var(--panel-2); color: var(--text);
-    font-size: 16px; font-weight: 600; cursor: pointer;
+  #input.cooldown-active {
+    color: var(--warn);
+    font-weight: 500;
+  }
+  #input.cooldown-active::placeholder {
+    color: var(--warn);
   }
 
-  .password-input {
-    width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
-    background: var(--panel-2); color: var(--text); font-size: 16px; margin-top: 8px;
-    outline: none;
+  .composer-btn {
+    width: 38px; height: 38px; border-radius: 10px;
+    border: none; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+    transition: background 0.15s, transform 0.1s;
+    background: transparent; color: var(--text-dim);
   }
-  .password-input:focus { border-color: var(--accent); }
-  .error-text { color: #ff6b6b; font-size: 12px; margin-top: 4px; display: none; }
-  .success-btn {
-    width: 100%; padding: 12px; margin-top: 8px; border-radius: 8px;
-    border: none; background: var(--accent); color: #fff;
-    font-size: 16px; font-weight: 600; cursor: pointer;
+  .composer-btn:hover { background: var(--surface-3); }
+  .composer-btn:active { transform: scale(0.92); }
+  .composer-btn.recording {
+    background: var(--danger); color: #fff;
+  }
+  .composer-btn svg { width: 18px; height: 18px; }
+
+  .send-btn {
+    width: 38px; height: 38px; border-radius: 10px;
+    border: none; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+    background: var(--accent); color: var(--accent-on);
+    transition: transform 0.1s, opacity 0.15s;
+  }
+  .send-btn:hover { opacity: 0.9; }
+  .send-btn:active { transform: scale(0.92); }
+  .send-btn:disabled {
+    background: var(--surface-3); color: var(--muted);
+    cursor: not-allowed;
+  }
+  .send-btn svg { width: 18px; height: 18px; }
+  .send-btn.stop { background: var(--danger); color: #fff; }
+
+  .disclaimer {
+    text-align: center; font-size: 11px;
+    color: var(--muted); margin-top: 8px;
+    line-height: 1.4; padding: 0 8px;
+    width: 100%; max-width: 720px;
   }
 
-  .api-key-block { margin-top: 12px; display: none; }
-  .api-key-hint {
-    font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.4;
-  }
-  .api-key-status {
-    font-size: 12px; margin-top: 6px; display: none;
-  }
-  .api-key-status.ok { color: var(--accent); display: block; }
-  .api-key-status.warn { color: #ffb84d; display: block; }
-
-  .lightbox {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.95); z-index: 200;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none; transition: opacity 0.3s;
-  }
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+  .modal.show { opacity: 1; pointer-events: auto; }
+  .modal-content { background: var(--sidebar-bg); width: 100%; max-width: 460px; border-radius: var(--radius-xl) var(--radius-xl) 0 0; padding: 6px 18px calc(18px + env(safe-area-inset-bottom)); transform: translateY(100%); transition: transform 0.3s cubic-bezier(.2,.8,.2,1); max-height: 88vh; overflow-y: auto; }
+  .modal.show .modal-content { transform: translateY(0); }
+  .modal-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--surface-3); margin: 8px auto 14px; }
+  .modal-title { font-size: 17px; font-weight: 600; margin-bottom: 18px; color: var(--text); }
+  .setting-item { margin-bottom: 20px; }
+  .setting-label { display: block; font-size: 13px; color: var(--text-dim); margin-bottom: 8px; font-weight: 500; }
+  .setting-options { display: flex; gap: 6px; flex-wrap: wrap; }
+  .setting-options button { flex: 1; min-width: 70px; padding: 10px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-light); background: transparent; color: var(--text-dim); cursor: pointer; font-size: 13px; transition: all 0.15s; }
+  .setting-options button:hover { background: var(--surface-2); color: var(--text); }
+  .setting-options button.active { background: var(--surface-3); color: var(--text); border-color: transparent; font-weight: 500; }
+  .modal-close { width: 100%; padding: 12px; margin-top: 6px; border-radius: var(--radius-md); border: 1px solid var(--border-light); background: transparent; color: var(--text-dim); font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+  .modal-close:hover { background: var(--surface-2); color: var(--text); }
+  .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
   .lightbox.show { opacity: 1; pointer-events: auto; }
-  .lightbox img { max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 8px; }
-  .lightbox-actions { margin-top: 20px; display: flex; gap: 16px; }
-  .lightbox-btn {
-    padding: 12px 24px; border-radius: 24px; border: none;
-    background: var(--accent); color: #fff; font-size: 16px; font-weight: 600;
-    cursor: pointer; display: flex; align-items: center; gap: 8px;
-  }
-  .lightbox-close {
-    position: absolute; top: calc(16px + env(safe-area-inset-top)); right: 16px;
-    width: 44px; height: 44px; border-radius: 50%;
-    background: rgba(255,255,255,0.1); border: none; color: #fff;
-    font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  .lightbox img { max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: var(--radius-md); }
+  .lightbox-actions { margin-top: 20px; display: flex; gap: 12px; }
+  .lightbox-btn { padding: 12px 24px; border-radius: 999px; border: none; background: #2f2f2f; color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; }
+  .lightbox-close { position: absolute; top: calc(12px + env(safe-area-inset-top)); right: 12px; width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.12); border: none; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+  @media (max-width: 420px) {
+    .bubble, .row.bot .bubble { font-size: 16px; }
+    .row.user .bubble { max-width: 88%; }
+    .welcome-screen h1 { font-size: 22px; }
+    .welcome-screen p { font-size: 15px; }
   }
 </style>
 </head>
@@ -279,9 +456,6 @@
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <div class="sidebar" id="sidebar">
-  <div class="sidebar-header">
-    <button class="new-chat-btn" id="newChatBtn">+ Новый чат</button>
-  </div>
   <div class="chat-list" id="chatList"></div>
   <div class="sidebar-footer">
     <button id="settingsBtn">Настройки</button>
@@ -289,88 +463,92 @@
 </div>
 
 <header class="header">
-  <button class="menu-btn" id="menuBtn">☰</button>
-  <div class="logo">HHAI</div>
-  <button class="header-btn" id="clearBtn">+</button>
+  <button class="icon-btn" id="menuBtn" aria-label="Меню">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M3 6h18M3 12h18M3 18h18"/>
+    </svg>
+  </button>
+  <span class="header-title" id="headerTitle">HHAI</span>
+  <div class="spacer"></div>
+  <button class="icon-btn plus-btn" id="clearBtn" aria-label="Новый чат" title="Новый чат">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 5v14M5 12h14"/>
+    </svg>
+  </button>
 </header>
 
 <div class="messages" id="messages"></div>
 
 <div class="bottom-panel">
   <div class="status-line" id="statusLine"></div>
-  
-  <div class="mode-buttons">
-    <button class="mode-btn" id="btnSearch">Поиск</button>
-    <button class="mode-btn" id="btnReasoning">Рассуждение</button>
+
+  <div class="tools-panel">
+    <button class="tool-btn" id="photoBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+        <circle cx="8.5" cy="8.5" r="1.5"/>
+        <polyline points="21 15 16 10 5 21"/>
+      </svg>
+      <span>Режим фото</span>
+    </button>
   </div>
 
-  <div class="composer-inner">
-    <textarea id="input" rows="1" placeholder="Спросите что-нибудь или попросите нарисовать..."></textarea>
-    <button class="send-btn" id="sendBtn" type="button">
+  <div class="composer-inner" id="composerInner">
+    <textarea id="input" rows="1" placeholder="Сообщение..."></textarea>
+    <button class="composer-btn" id="voiceBtn" aria-label="Голосовой ввод">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="2" width="6" height="12" rx="3"/>
+        <path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3"/>
+      </svg>
+    </button>
+    <button class="send-btn" id="sendBtn" type="button" aria-label="Отправить">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 19V5M5 12l7-7 7 7"/>
       </svg>
     </button>
   </div>
+  <div class="disclaimer">ИИ может ошибаться.</div>
 </div>
 
 <div class="modal" id="settingsModal">
   <div class="modal-content">
+    <div class="modal-handle"></div>
     <div class="modal-title">Настройки</div>
+
     <div class="setting-item">
-      <label class="setting-label">Тема оформления</label>
+      <label class="setting-label">Тема</label>
       <div class="setting-options" id="themeOptions">
-        <button data-theme="dark" class="active">Тёмная</button>
+        <button data-theme="dark">Тёмная</button>
         <button data-theme="light">Светлая</button>
+        <button data-theme="auto">Системная</button>
       </div>
     </div>
+
     <div class="setting-item">
-      <label class="setting-label">Возрастной рейтинг</label>
-      <div class="setting-options" id="ageOptions">
-        <button data-age="12" class="active">12+ (Помощник)</button>
-        <button data-age="18">18+ (Без правил)</button>
-      </div>
-      <div id="passwordBlock" style="display:none; margin-top: 12px;">
-        <label class="setting-label" id="passwordLabel">Введите пароль:</label>
-        <input type="password" id="agePassword" class="password-input" placeholder="Пароль">
-        <div class="error-text" id="passError">Неверный пароль</div>
-        <button class="success-btn" id="passwordSubmitBtn">Подтвердить</button>
+      <label class="setting-label">Текстовая модель</label>
+      <div class="setting-options" id="textModelOptions">
+        <button data-textmodel="pollinations">Pollinations (бесплатно)</button>
+        <button data-textmodel="mistral">Mistral Agent (ключ)</button>
       </div>
     </div>
+
     <div class="setting-item">
-      <label class="setting-label">API-ключ</label>
-      <div class="setting-options" id="apiModeOptions">
-        <button data-apimode="free">Бесплатно (аноним)</button>
-        <button data-apimode="own">Свой ключ</button>
-      </div>
-      <div class="api-key-block" id="apiKeyBlock">
-        <input type="password" id="apiKeyInput" class="password-input" placeholder="Вставь свой ключ pollinations">
-        <button class="success-btn" id="apiKeySaveBtn">Сохранить ключ</button>
-        <button class="modal-close" id="apiKeyClearBtn" style="margin-top: 8px;">Удалить ключ</button>
-        <div class="api-key-hint">
-          Ключ хранится только в этом браузере (localStorage) и не отправляется никуда, кроме pollinations.ai.
-        </div>
-        <div class="api-key-status" id="apiKeyStatus"></div>
+      <label class="setting-label">Модель для фото</label>
+      <div class="setting-options" id="modelOptions">
+        <button data-model="flux">Flux (Реализм)</button>
+        <button data-model="zimage">ZImage (Геометрия)</button>
+        <button data-model="turbo">Turbo (Быстро)</button>
+        <button data-model="gptimage">GPT Image</button>
       </div>
     </div>
-    <div class="setting-item">
-      <label class="setting-label">Сервер API</label>
-      <div class="setting-options" id="serverOptions">
-        <button data-server="gen" class="active">Gen (Ключ)</button>
-        <button data-server="text">Стандартный</button>
-        <button data-server="anon">Аноним (30с)</button>
-      </div>
-      <div class="api-key-hint" style="margin-top: 8px;">
-        «Gen» и «Стандартный» используют ключ из настроек. Если ключа нет — автоматически работает анонимный режим.
-      </div>
-    </div>
+
     <button class="modal-close" id="closeSettings">Закрыть</button>
   </div>
 </div>
 
 <div class="lightbox" id="lightbox">
-  <button class="lightbox-close" id="lightboxClose">X</button>
-  <img id="lightboxImg" src="" alt="Просмотр">
+  <button class="lightbox-close" id="lightboxClose">×</button>
+  <img id="lightboxImg" src="" alt="">
   <div class="lightbox-actions">
     <button class="lightbox-btn" id="downloadBtn">Скачать</button>
   </div>
@@ -380,106 +558,62 @@
 (function() {
   'use strict';
 
-  // ===== Ключ больше НЕ хранится в коде =====
-  // Он берётся из localStorage (ввод в настройках).
+  // ===== НАСТРОЙКИ КЛЮЧЕЙ =====
+  const MISTRAL_API_KEY = 'mstrl_UoSQU5OnoWdc41zRNDAEaoVOjcw2pal6_37Gqi8';
+  const MISTRAL_AGENT_ID = 'ag_01a1a7f14c2d70c185253308fe7e764a';
 
   const messagesEl = document.getElementById('messages');
   const inputEl = document.getElementById('input');
   const sendBtn = document.getElementById('sendBtn');
+  const voiceBtn = document.getElementById('voiceBtn');
+  const photoBtn = document.getElementById('photoBtn'); 
   const menuBtn = document.getElementById('menuBtn');
   const clearBtn = document.getElementById('clearBtn');
+  const headerTitle = document.getElementById('headerTitle');
   const sidebar = document.getElementById('sidebar');
   const sidebarOverlay = document.getElementById('sidebarOverlay');
-  const newChatBtn = document.getElementById('newChatBtn');
   const chatList = document.getElementById('chatList');
   const settingsBtn = document.getElementById('settingsBtn');
   const settingsModal = document.getElementById('settingsModal');
   const closeSettings = document.getElementById('closeSettings');
   const statusLine = document.getElementById('statusLine');
-  
-  const btnSearch = document.getElementById('btnSearch');
-  const btnReasoning = document.getElementById('btnReasoning');
-
-  const passwordBlock = document.getElementById('passwordBlock');
-  const passwordLabel = document.getElementById('passwordLabel');
-  const agePassword = document.getElementById('agePassword');
-  const passError = document.getElementById('passError');
-  const passwordSubmitBtn = document.getElementById('passwordSubmitBtn');
-
-  const apiModeOptions = document.getElementById('apiModeOptions');
-  const apiKeyBlock = document.getElementById('apiKeyBlock');
-  const apiKeyInput = document.getElementById('apiKeyInput');
-  const apiKeySaveBtn = document.getElementById('apiKeySaveBtn');
-  const apiKeyClearBtn = document.getElementById('apiKeyClearBtn');
-  const apiKeyStatus = document.getElementById('apiKeyStatus');
+  const composerInner = document.getElementById('composerInner');
 
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightboxImg');
   const lightboxClose = document.getElementById('lightboxClose');
   const downloadBtn = document.getElementById('downloadBtn');
 
-  let chats = JSON.parse(localStorage.getItem('hh_chats')) || [];
+  let chats = [];
+  try { chats = JSON.parse(localStorage.getItem('hh_chats')) || []; } catch(e) { chats = []; }
   let currentChatId = null;
-  let currentAge = localStorage.getItem('hh_age') || '12';
   let currentTheme = localStorage.getItem('hh_theme') || 'dark';
-  let currentServer = localStorage.getItem('hh_server') || 'anon'; // по умолчанию — аноним
-  let apiMode = localStorage.getItem('hh_api_mode') || 'free'; // 'free' | 'own'
-  let userApiKey = localStorage.getItem('hh_api_key') || '';
+  let selectedModel = localStorage.getItem('hh_image_model') || 'flux';
+  let selectedTextModel = localStorage.getItem('hh_text_model') || 'pollinations';
 
-  let useSearch = false;
-  let useReasoning = false;
-
-  // ===== Лимиты истории =====
   const MAX_MESSAGES_PER_CHAT = 200;
   const MAX_CHATS = 50;
   const MAX_STORAGE_BYTES = 4 * 1024 * 1024;
-
   const IMG_COOLDOWN_MS = 45000;
-  let imgCooldownUntil = 0;
+  
+  let currentAbort = null;
+  let recognition = null;
+  let isRecording = false;
+  
   let cooldownInterval = null;
+  let cooldownUntil = 0;
+  
+  let imgCooldownUntil = 0; 
+  let isPhotoMode = false;
+  let statusTimeout = null;
+  
+  let photoBtnInterval = null;
 
-  let anonCooldownUntil = 0;
-  let pendingAgeChange = null;
-
-  // ===== Реестр интервалов =====
-  const activeIntervals = new Set();
-
-  function setManagedInterval(fn, ms) {
-    const id = setInterval(fn, ms);
-    activeIntervals.add(id);
-    return id;
-  }
-
-  function clearManagedInterval(id) {
-    if (id == null) return;
-    clearInterval(id);
-    activeIntervals.delete(id);
-  }
-
-  function clearAllManagedIntervals() {
-    activeIntervals.forEach(id => clearInterval(id));
-    activeIntervals.clear();
-  }
-
-  // ===== Ключ: получить актуальный =====
-  function getApiKey() {
-    return userApiKey && apiMode === 'own' ? userApiKey : '';
-  }
-
-  function hasApiKey() {
-    return !!getApiKey();
-  }
-
-  // ===== Управление хранилищем =====
   function trimChat(chat) {
     if (chat.messages.length > MAX_MESSAGES_PER_CHAT) {
       chat.messages = chat.messages.slice(-MAX_MESSAGES_PER_CHAT);
     }
-    if (chat.history && chat.history.length > MAX_MESSAGES_PER_CHAT) {
-      chat.history = chat.history.slice(-MAX_MESSAGES_PER_CHAT);
-    }
   }
-
   function enforceStorageLimits() {
     chats.forEach(trimChat);
     while (chats.length > MAX_CHATS) chats.pop();
@@ -492,24 +626,21 @@
       currentChatId = chats[0].id;
     }
   }
-
   function saveChats() {
     enforceStorageLimits();
     try {
       localStorage.setItem('hh_chats', JSON.stringify(chats));
     } catch (e) {
-      console.warn('localStorage переполнен, очищаю старые чаты');
       while (chats.length > 1) {
         chats.pop();
         try {
           localStorage.setItem('hh_chats', JSON.stringify(chats));
           return;
-        } catch (_) { /* продолжаем резать */ }
+        } catch (_) {}
       }
     }
   }
 
-  // ===== Инициализация =====
   function init() {
     enforceStorageLimits();
     applyTheme(currentTheme);
@@ -519,19 +650,42 @@
       if (!currentChatId || !chats.find(c => c.id === currentChatId)) {
         currentChatId = chats[0].id;
       }
-      renderChatList();
       loadChat(currentChatId);
     }
     updateSettingsUI();
+    initVoice();
+    setupSystemThemeListener();
+    updatePhotoBtnState();
+    startPhotoBtnTicker();
+  }
+
+  function applyTheme(theme) {
+    const isLight = theme === 'light' ||
+      (theme === 'auto' && window.matchMedia('(prefers-color-scheme: light)').matches);
+    document.body.classList.toggle('light-theme', isLight);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', isLight ? '#ffffff' : '#212121');
+  }
+  function setupSystemThemeListener() {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    mq.addEventListener('change', () => {
+      if (currentTheme === 'auto') applyTheme('auto');
+    });
   }
 
   function createNewChat() {
-    clearAllManagedIntervals();
-    cooldownInterval = null;
+    stopGeneration();
     imgCooldownUntil = 0;
-    sendBtn.disabled = false;
-
-    const newChat = { id: Date.now().toString(), title: "Новый чат", messages: [], history: [] };
+    isPhotoMode = false;
+    photoBtn.classList.remove('active');
+    updatePhotoBtnState();
+    
+    const newChat = {
+      id: Date.now().toString(),
+      title: "Новый чат",
+      messages: [],
+      autoTitled: false
+    };
     chats.unshift(newChat);
     saveChats();
     currentChatId = newChat.id;
@@ -541,22 +695,26 @@
   }
 
   function loadChat(id) {
+    stopGeneration();
     const chat = chats.find(c => c.id === id);
     if (!chat) return;
-    
     currentChatId = id;
     messagesEl.innerHTML = '';
-    
-    chat.messages.forEach(msg => {
-      if (msg.role === 'user') {
-        addUserMessage(msg.text, msg.img);
-      } else {
-        addBotMessage(msg.text, msg.img);
-      }
-    });
-    
+    headerTitle.textContent = chat.title === "Новый чат" ? "HHAI" : chat.title;
+
     if (chat.messages.length === 0) {
-      addBotMessage("Привет! Я HHAI.\n\nЯ умею искать в интернете, рассуждать, помогать с учёбой и генерировать картинки. Просто напиши, что нужно.");
+      const welcome = document.createElement('div');
+      welcome.className = 'welcome-screen';
+      welcome.innerHTML = `
+        <h1>Добро пожаловать в HHAI</h1>
+        <p>Я умею создавать фотографии и помогать вам с текстом.</p>
+      `;
+      messagesEl.appendChild(welcome);
+    } else {
+      chat.messages.forEach((msg, idx) => {
+        if (msg.role === 'user') addUserMessage(msg.text, msg.img, idx);
+        else addBotMessage(msg.text, msg.img, idx);
+      });
     }
     renderChatList();
     scrollDown();
@@ -564,20 +722,24 @@
 
   function renderChatList() {
     chatList.innerHTML = '';
+    if (chats.length === 0) {
+      const empty = document.createElement('div');
+      empty.style.cssText = 'padding:20px;text-align:center;color:var(--muted);font-size:14px;';
+      empty.textContent = 'Нет чатов';
+      chatList.appendChild(empty);
+      return;
+    }
+
     chats.forEach(chat => {
       const div = document.createElement('div');
       div.className = 'chat-item' + (chat.id === currentChatId ? ' active' : '');
-      
       const span = document.createElement('span');
+      span.className = 'title';
       span.textContent = chat.title;
-      span.style.overflow = 'hidden';
-      span.style.textOverflow = 'ellipsis';
-      
       const delBtn = document.createElement('button');
       delBtn.className = 'delete-chat';
-      delBtn.textContent = 'Удалить';
+      delBtn.textContent = '×';
       delBtn.onclick = (e) => { e.stopPropagation(); deleteChat(chat.id); };
-      
       div.appendChild(span);
       div.appendChild(delBtn);
       div.onclick = () => { loadChat(chat.id); closeSidebar(); };
@@ -586,23 +748,21 @@
   }
 
   function deleteChat(id) {
-    clearAllManagedIntervals();
-    cooldownInterval = null;
-    imgCooldownUntil = 0;
-    sendBtn.disabled = false;
-
     chats = chats.filter(c => c.id !== id);
     saveChats();
     if (currentChatId === id) {
       if (chats.length > 0) loadChat(chats[0].id);
       else createNewChat();
-    } else renderChatList();
+    } else {
+      renderChatList();
+    }
   }
 
   function updateChatTitle(text) {
     const chat = chats.find(c => c.id === currentChatId);
     if (chat && chat.title === "Новый чат") {
-      chat.title = text.substring(0, 20) + (text.length > 20 ? '...' : '');
+      chat.title = text.substring(0, 28) + (text.length > 28 ? '…' : '');
+      headerTitle.textContent = chat.title;
       saveChats();
       renderChatList();
     }
@@ -613,388 +773,933 @@
 
   menuBtn.onclick = openSidebar;
   sidebarOverlay.onclick = closeSidebar;
-  newChatBtn.onclick = createNewChat;
-  
-  // ===== Режимы =====
-  btnSearch.onclick = () => {
-    useSearch = !useSearch;
-    btnSearch.classList.toggle('active', useSearch);
-  };
-  btnReasoning.onclick = () => {
-    useReasoning = !useReasoning;
-    btnReasoning.classList.toggle('active', useReasoning);
-  };
+  clearBtn.onclick = createNewChat;
 
-  // ===== Настройки =====
-  settingsBtn.onclick = () => { 
-    settingsModal.classList.add('show'); 
-    closeSidebar(); 
-    passwordBlock.style.display = 'none';
-    passError.style.display = 'none';
-    agePassword.value = '';
-    refreshApiUI();
+  settingsBtn.onclick = () => {
+    settingsModal.classList.add('show');
+    closeSidebar();
   };
   closeSettings.onclick = () => settingsModal.classList.remove('show');
-  settingsModal.onclick = (e) => { if (e.target === settingsModal) settingsModal.classList.remove('show'); };
+  settingsModal.onclick = (e) => {
+    if (e.target === settingsModal) settingsModal.classList.remove('show');
+  };
 
   document.getElementById('themeOptions').onclick = (e) => {
     if (e.target.tagName !== 'BUTTON') return;
-    const theme = e.target.dataset.theme;
-    currentTheme = theme;
-    localStorage.setItem('hh_theme', theme);
-    applyTheme(theme);
+    currentTheme = e.target.dataset.theme;
+    localStorage.setItem('hh_theme', currentTheme);
+    applyTheme(currentTheme);
     updateSettingsUI();
   };
 
-  // ----- API-ключ: выбор режима -----
-  apiModeOptions.onclick = (e) => {
+  document.getElementById('textModelOptions').onclick = (e) => {
     if (e.target.tagName !== 'BUTTON') return;
-    const mode = e.target.dataset.apimode;
-    apiMode = mode;
-    localStorage.setItem('hh_api_mode', mode);
-
-    // Если выбрали «свой ключ», но ключа нет — показываем поле
-    if (mode === 'own' && !userApiKey) {
-      apiKeyBlock.style.display = 'block';
-      apiKeyInput.focus();
-    } else {
-      apiKeyBlock.style.display = 'none';
-    }
-
-    // Если выбрали аноним, но сервер был gen/text — переключаем на anon
-    if (mode === 'free' && (currentServer === 'gen' || currentServer === 'text')) {
-      currentServer = 'anon';
-      localStorage.setItem('hh_server', 'anon');
-    }
-
-    refreshApiUI();
+    selectedTextModel = e.target.dataset.textmodel;
+    localStorage.setItem('hh_text_model', selectedTextModel);
     updateSettingsUI();
+    showStatus(`Текстовая модель: ${selectedTextModel}`, false);
   };
 
-  apiKeySaveBtn.onclick = () => {
-    const key = apiKeyInput.value.trim();
-    if (!key) {
-      apiKeyStatus.textContent = "Ключ пустой";
-      apiKeyStatus.className = 'api-key-status warn';
-      return;
-    }
-    if (!key.startsWith('sk_') && key.length < 10) {
-      apiKeyStatus.textContent = "Похоже, это не ключ pollinations (обычно начинается с sk_)";
-      apiKeyStatus.className = 'api-key-status warn';
-      // всё равно сохраняем — вдруг формат другой
-    }
-    userApiKey = key;
-    localStorage.setItem('hh_api_key', key);
-    apiKeyInput.value = '';
-    apiKeyStatus.textContent = "Ключ сохранён";
-    apiKeyStatus.className = 'api-key-status ok';
-    // Автоматически переключаем сервер на gen, если был anon
-    if (currentServer === 'anon') {
-      currentServer = 'gen';
-      localStorage.setItem('hh_server', 'gen');
-    }
-    refreshApiUI();
-    updateSettingsUI();
-  };
-
-  apiKeyClearBtn.onclick = () => {
-    userApiKey = '';
-    localStorage.removeItem('hh_api_key');
-    apiKeyStatus.textContent = "Ключ удалён";
-    apiKeyStatus.className = 'api-key-status warn';
-    // Переключаем на аноним
-    apiMode = 'free';
-    localStorage.setItem('hh_api_mode', 'free');
-    if (currentServer === 'gen' || currentServer === 'text') {
-      currentServer = 'anon';
-      localStorage.setItem('hh_server', 'anon');
-    }
-    refreshApiUI();
-    updateSettingsUI();
-  };
-
-  function refreshApiUI() {
-    // Подсветка кнопок режима
-    document.querySelectorAll('#apiModeOptions button').forEach(btn => {
-      if (btn.dataset.apimode === apiMode) btn.classList.add('active');
-      else btn.classList.remove('active');
-    });
-
-    // Показ поля ввода
-    if (apiMode === 'own') {
-      apiKeyBlock.style.display = 'block';
-      if (userApiKey) {
-        apiKeyStatus.textContent = "Ключ сохранён ✓";
-        apiKeyStatus.className = 'api-key-status ok';
-      } else {
-        apiKeyStatus.textContent = "Ключ не задан";
-        apiKeyStatus.className = 'api-key-status warn';
-      }
-    } else {
-      apiKeyBlock.style.display = 'none';
-      apiKeyStatus.textContent = '';
-      apiKeyStatus.className = 'api-key-status';
-    }
-  }
-
-  // ----- Возрастной рейтинг -----
-  document.getElementById('ageOptions').onclick = (e) => {
+  document.getElementById('modelOptions').onclick = (e) => {
     if (e.target.tagName !== 'BUTTON') return;
-    const targetAge = e.target.dataset.age;
-    
-    if (targetAge === currentAge) return;
-    
-    if (targetAge === '12') {
-      const savedPassword = localStorage.getItem('hh_age_password');
-      if (savedPassword) {
-        pendingAgeChange = '12';
-        passwordLabel.textContent = "Введите пароль, чтобы включить 12+:";
-        passwordBlock.style.display = 'block';
-        agePassword.value = '';
-        agePassword.focus();
-      } else {
-        pendingAgeChange = 'create_12';
-        passwordLabel.textContent = "Придумайте пароль для ограничения 12+ (мин. 4 символа):";
-        passwordBlock.style.display = 'block';
-        agePassword.value = '';
-        agePassword.focus();
-      }
-    } 
-    else if (targetAge === '18') {
-      const savedPassword = localStorage.getItem('hh_age_password');
-      if (savedPassword) {
-        pendingAgeChange = '18';
-        passwordLabel.textContent = "Введите пароль для отключения ограничений:";
-        passwordBlock.style.display = 'block';
-        agePassword.value = '';
-        agePassword.focus();
-      } else {
-        applyAge('18');
-        passwordBlock.style.display = 'none';
-      }
-    }
-  };
-
-  document.getElementById('serverOptions').onclick = (e) => {
-    if (e.target.tagName !== 'BUTTON') return;
-    const server = e.target.dataset.server;
-    // Если выбрали gen/text, но ключа нет — предупреждаем и переключаем на anon
-    if ((server === 'gen' || server === 'text') && !hasApiKey()) {
-      currentServer = 'anon';
-      localStorage.setItem('hh_server', 'anon');
-      alert('Для этого сервера нужен свой ключ. Сейчас включён анонимный режим.\n\nВведи ключ в блоке «API-ключ» выше.');
-      updateSettingsUI();
-      return;
-    }
-    currentServer = server;
-    localStorage.setItem('hh_server', server);
+    selectedModel = e.target.dataset.model;
+    localStorage.setItem('hh_image_model', selectedModel);
     updateSettingsUI();
+    showStatus(`Модель фото: ${selectedModel}`, false);
   };
-
-  passwordSubmitBtn.onclick = () => {
-    const val = agePassword.value.trim();
-    const savedPassword = localStorage.getItem('hh_age_password');
-    
-    if (pendingAgeChange === 'create_12') {
-      if (val.length < 4) {
-        passError.textContent = "Пароль слишком короткий (мин. 4)";
-        passError.style.display = 'block';
-        return;
-      }
-      localStorage.setItem('hh_age_password', val);
-      applyAge('12');
-      passwordBlock.style.display = 'none';
-      passError.style.display = 'none';
-    } 
-    else if (pendingAgeChange === '12') {
-      if (val === savedPassword) {
-        applyAge('12');
-        passwordBlock.style.display = 'none';
-        passError.style.display = 'none';
-      } else {
-        passError.textContent = "Неверный пароль";
-        passError.style.display = 'block';
-      }
-    } 
-    else if (pendingAgeChange === '18') {
-      if (val === savedPassword) {
-        applyAge('18');
-        passwordBlock.style.display = 'none';
-        passError.style.display = 'none';
-      } else {
-        passError.textContent = "Неверный пароль";
-        passError.style.display = 'block';
-      }
-    }
-  };
-
-  function applyAge(age) {
-    currentAge = age;
-    localStorage.setItem('hh_age', age);
-    updateSettingsUI();
-    pendingAgeChange = null;
-  }
 
   function updateSettingsUI() {
-    document.querySelectorAll('#ageOptions button').forEach(btn => {
-      if (btn.dataset.age === currentAge) btn.classList.add('active');
-      else btn.classList.remove('active');
-    });
     document.querySelectorAll('#themeOptions button').forEach(btn => {
-      if (btn.dataset.theme === currentTheme) btn.classList.add('active');
-      else btn.classList.remove('active');
+      btn.classList.toggle('active', btn.dataset.theme === currentTheme);
     });
-    document.querySelectorAll('#serverOptions button').forEach(btn => {
-      if (btn.dataset.server === currentServer) btn.classList.add('active');
-      else btn.classList.remove('active');
+    document.querySelectorAll('#textModelOptions button').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.textmodel === selectedTextModel);
     });
-    document.querySelectorAll('#apiModeOptions button').forEach(btn => {
-      if (btn.dataset.apimode === apiMode) btn.classList.add('active');
-      else btn.classList.remove('active');
+    document.querySelectorAll('#modelOptions button').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.model === selectedModel);
     });
   }
 
-  function applyTheme(theme) {
-    if (theme === 'light') document.body.classList.add('light-theme');
-    else document.body.classList.remove('light-theme');
+  function showStatus(text, isError = false) {
+    if (statusTimeout) clearTimeout(statusTimeout);
+    statusLine.innerHTML = text;
+    statusLine.className = 'status-line show' + (isError ? ' error' : '');
+    if (isError) {
+      statusTimeout = setTimeout(() => { statusLine.classList.remove('show', 'error'); }, 3000);
+    } else {
+      statusTimeout = setTimeout(() => { statusLine.classList.remove('show'); }, 2000);
+    }
+  }
+  
+  function hideStatus() { 
+    if (statusTimeout) clearTimeout(statusTimeout);
+    statusLine.classList.remove('show', 'error'); 
   }
 
-  function showStatus(text, withSpinner = true) {
-    statusLine.innerHTML = (withSpinner ? '<div class="spinner-small"></div>' : '') + text;
-    statusLine.classList.add('show');
+  function scrollDown() {
+    messagesEl.scrollTop = messagesEl.scrollHeight;
   }
-  function hideStatus() { statusLine.classList.remove('show'); }
 
-  function scrollDown() { messagesEl.scrollTop = messagesEl.scrollHeight; }
+  function startTextCooldown(seconds = 30) {
+    const ms = seconds * 1000;
+    cooldownUntil = Date.now() + ms + 1000;
+    composerInner.classList.add('disabled');
+    inputEl.disabled = true;
+    inputEl.classList.add('cooldown-active');
+    
+    if (cooldownInterval) clearInterval(cooldownInterval);
+    
+    function updateTimer() {
+      const remaining = Math.ceil((cooldownUntil - Date.now()) / 1000);
+      if (remaining > 0) {
+        inputEl.placeholder = `Подожди ${remaining} сек...`;
+      } else {
+        stopCooldown();
+      }
+    }
+    
+    updateTimer();
+    cooldownInterval = setInterval(updateTimer, 100);
+  }
+  
+  function stopCooldown() {
+    if (cooldownInterval) {
+      clearInterval(cooldownInterval);
+      cooldownInterval = null;
+    }
+    composerInner.classList.remove('disabled');
+    inputEl.disabled = false;
+    inputEl.classList.remove('cooldown-active');
+    inputEl.placeholder = isPhotoMode ? "Опиши картинку..." : "Сообщение...";
+  }
+
+  function updatePhotoBtnState() {
+    if (Date.now() < imgCooldownUntil) {
+      photoBtn.disabled = true;
+      photoBtn.classList.add('disabled');
+    } else {
+      photoBtn.disabled = false;
+      photoBtn.classList.remove('disabled');
+    }
+  }
+
+  function startPhotoBtnTicker() {
+    if (photoBtnInterval) clearInterval(photoBtnInterval);
+    photoBtnInterval = setInterval(() => {
+      if (imgCooldownUntil > Date.now()) {
+        updatePhotoBtnState();
+      } else if (photoBtn.classList.contains('disabled')) {
+        updatePhotoBtnState();
+      }
+    }, 1000);
+  }
+
+  photoBtn.onclick = () => {
+    if (Date.now() < imgCooldownUntil) {
+      const remaining = Math.ceil((imgCooldownUntil - Date.now()) / 1000);
+      showStatus(`Кулдаун фото не прошел. Жди ${remaining} сек.`, true);
+      return;
+    }
+    
+    isPhotoMode = !isPhotoMode;
+    if (isPhotoMode) {
+      photoBtn.classList.add('active');
+      if (!inputEl.disabled) inputEl.placeholder = "Опиши картинку...";
+    } else {
+      photoBtn.classList.remove('active');
+      if (!inputEl.disabled) inputEl.placeholder = "Сообщение...";
+    }
+  };
+
+  function initVoice() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      voiceBtn.disabled = true;
+      voiceBtn.style.opacity = '0.4';
+      return;
+    }
+    recognition = new SpeechRecognition();
+    recognition.lang = 'ru-RU';
+    recognition.interimResults = true;
+    recognition.continuous = false;
+
+    recognition.onresult = (e) => {
+      let text = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        text += e.results[i][0].transcript;
+      }
+      inputEl.value = text;
+      inputEl.style.height = 'auto';
+      inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+    };
+    recognition.onerror = () => { stopRecording(); };
+    recognition.onend = () => { stopRecording(); };
+  }
+
+  voiceBtn.onclick = () => {
+    if (!recognition) return;
+    if (isRecording) {
+      recognition.stop();
+    } else {
+      try {
+        recognition.start();
+        isRecording = true;
+        voiceBtn.classList.add('recording');
+      } catch (e) {
+        stopRecording();
+      }
+    }
+  };
+
+  function stopRecording() {
+    isRecording = false;
+    voiceBtn.classList.remove('recording');
+  }
 
   function createImageElement(src) {
     const img = document.createElement('img');
     img.src = src;
     img.crossOrigin = 'anonymous';
-    img.onclick = () => openLightbox(src);
+    img.loading = 'lazy';
+    img.onclick = (e) => { e.stopPropagation(); openLightbox(src); };
     return img;
   }
 
-  function createMsgCopyBtn(textToCopy) {
+  function makeActionBtn(label, onClick) {
     const btn = document.createElement('button');
-    btn.className = 'msg-copy-btn';
-    btn.innerHTML = 'Копировать';
-    btn.onclick = (e) => {
-      e.stopPropagation();
-      navigator.clipboard.writeText(textToCopy).then(() => {
-        btn.innerHTML = 'Скопировано';
-        setTimeout(() => btn.innerHTML = 'Копировать', 1500);
-      }).catch(() => {
-        const ta = document.createElement('textarea');
-        ta.value = textToCopy;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        btn.innerHTML = 'Скопировано';
-        setTimeout(() => btn.innerHTML = 'Копировать', 1500);
-      });
-    };
+    btn.className = 'action-btn';
+    btn.textContent = label;
+    btn.onclick = (e) => { e.stopPropagation(); onClick(); };
     return btn;
   }
 
-  function addUserMessage(text, imgUrl) {
+  function addUserMessage(text, imgUrl, msgIndex) {
     const row = document.createElement('div');
     row.className = 'row user';
     const b = document.createElement('div');
     b.className = 'bubble';
+
     if (imgUrl) b.appendChild(createImageElement(imgUrl));
     if (text) {
       const span = document.createElement('div');
       span.textContent = text;
       b.appendChild(span);
-      b.appendChild(createMsgCopyBtn(text));
+
+      const actions = document.createElement('div');
+      actions.className = 'msg-actions';
+
+      const copyBtn = makeActionBtn('Копировать', () => {
+        copyToClipboard(text, copyBtn, 'Копировать');
+      });
+      actions.appendChild(copyBtn);
+
+      if (typeof msgIndex === 'number') {
+        const editBtn = makeActionBtn('Изменить', () => {
+          startEditMessage(b, text, msgIndex);
+        });
+        actions.appendChild(editBtn);
+      }
+
+      b.appendChild(actions);
+
+      b.onclick = (e) => {
+        if (e.target.closest('button') || e.target.tagName === 'IMG') return;
+        actions.classList.toggle('visible');
+      };
     }
     row.appendChild(b);
     messagesEl.appendChild(row);
     scrollDown();
   }
 
+  function startEditMessage(bubbleEl, oldText, msgIndex) {
+    const chat = chats.find(c => c.id === currentChatId);
+    if (!chat) return;
+    const msg = chat.messages[msgIndex];
+    if (!msg || msg.role !== 'user') return;
+
+    bubbleEl.onclick = null;
+    bubbleEl.innerHTML = '';
+    const ta = document.createElement('textarea');
+    ta.className = 'edit-area';
+    ta.value = oldText;
+    bubbleEl.appendChild(ta);
+
+    const actions = document.createElement('div');
+    actions.className = 'edit-actions';
+    actions.style.display = 'flex';
+
+    const saveBtn = makeActionBtn('Сохранить', async () => {
+      const newText = ta.value.trim();
+      if (!newText || newText === oldText) {
+        loadChat(currentChatId);
+        return;
+      }
+      chat.messages = chat.messages.slice(0, msgIndex);
+      saveChats();
+      inputEl.value = newText;
+      loadChat(currentChatId);
+      setTimeout(() => send(), 50);
+    });
+
+    const cancelBtn = makeActionBtn('Отмена', () => {
+      loadChat(currentChatId);
+    });
+
+    actions.appendChild(saveBtn);
+    actions.appendChild(cancelBtn);
+    bubbleEl.appendChild(actions);
+    ta.focus();
+    ta.setSelectionRange(ta.value.length, ta.value.length);
+  }
+
   function renderRichText(container, text) {
     container.textContent = '';
     const parts = text.split(/(```[\s\S]*?```)/g);
-    
     parts.forEach(part => {
       if (part.startsWith('```')) {
-        const match = part.match(/```(\w*)\n([\s\S]*?)```/);
-        let lang = match ? match[1] : '';
-        let code = match ? match[2] : part.slice(3, -3);
-        
+        const match = part.match(/```(\w*)\n?([\s\S]*?)```/);
+        const lang = match ? match[1] : '';
+        const code = match ? match[2] : part.slice(3, -3);
+
         const codeBlock = document.createElement('div');
         codeBlock.className = 'code-block';
-        
-        const codeHeader = document.createElement('div');
-        codeHeader.className = 'code-header';
+
+        const header = document.createElement('div');
+        header.className = 'code-header';
         const langSpan = document.createElement('span');
         langSpan.textContent = lang || 'code';
-        codeHeader.appendChild(langSpan);
-        
+        header.appendChild(langSpan);
+
         const copyBtn = document.createElement('button');
         copyBtn.textContent = 'Копировать';
-        copyBtn.onclick = () => {
-          navigator.clipboard.writeText(code).then(() => {
-            copyBtn.textContent = 'Скопировано';
-            setTimeout(() => copyBtn.textContent = 'Копировать', 1500);
-          });
-        };
-        codeHeader.appendChild(copyBtn);
-        
-        const codeContent = document.createElement('div');
-        codeContent.className = 'code-content';
-        codeContent.textContent = code;
-        
-        codeBlock.appendChild(codeHeader);
-        codeBlock.appendChild(codeContent);
+        copyBtn.onclick = (e) => { e.stopPropagation(); copyToClipboard(code, copyBtn, 'Копировать'); };
+        header.appendChild(copyBtn);
+
+        const content = document.createElement('div');
+        content.className = 'code-content';
+        content.textContent = code;
+
+        codeBlock.appendChild(header);
+        codeBlock.appendChild(content);
         container.appendChild(codeBlock);
-      } else {
-        if (part) {
-          const span = document.createElement('span');
-          span.textContent = part;
-          container.appendChild(span);
-        }
+      } else if (part) {
+        const span = document.createElement('span');
+        span.textContent = part;
+        container.appendChild(span);
       }
     });
   }
 
-  function addBotMessage(text, imgUrl) {
+  function addBotMessage(text, imgUrl, msgIndex) {
     const row = document.createElement('div');
     row.className = 'row bot';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.textContent = 'H';
+    row.appendChild(avatar);
+
     const b = document.createElement('div');
     b.className = 'bubble';
-    
-    const tag = document.createElement('div');
-    tag.className = 'model-tag';
-    tag.textContent = 'HHAI';
-    b.appendChild(tag);
-    
+
     if (imgUrl) {
       b.appendChild(createImageElement(imgUrl));
       const hint = document.createElement('div');
       hint.className = 'img-hint';
-      hint.textContent = 'Нажми на фото, чтобы скачать';
+      hint.textContent = 'Нажми, чтобы скачать';
       b.appendChild(hint);
     }
-    
+
     if (text) {
       const textContainer = document.createElement('div');
       textContainer.className = 'text-content';
       renderRichText(textContainer, text);
       b.appendChild(textContainer);
-      b.appendChild(createMsgCopyBtn(text));
+      
+      const actions = document.createElement('div');
+      actions.className = 'msg-actions';
+      const copyBtn = makeActionBtn('Копировать', () => copyToClipboard(text, copyBtn, 'Копировать'));
+      actions.appendChild(copyBtn);
+      if (typeof msgIndex === 'number') {
+        const regenBtn = makeActionBtn('Заново', () => regenerateFrom(msgIndex));
+        actions.appendChild(regenBtn);
+      }
+      b.appendChild(actions);
     }
+
+    b.onclick = (e) => {
+      if (e.target.closest('button') || e.target.tagName === 'IMG') return;
+      const actions = b.querySelector('.msg-actions');
+      if (actions) actions.classList.toggle('visible');
+    };
+
     row.appendChild(b);
     messagesEl.appendChild(row);
     scrollDown();
     return b;
   }
 
+  function copyToClipboard(text, btn, originalLabel) {
+    const done = () => {
+      btn.textContent = 'Скопировано';
+      setTimeout(() => btn.textContent = originalLabel, 1500);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+    } else {
+      fallbackCopy(text, done);
+    }
+  }
+  function fallbackCopy(text, done) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); } catch(e) {}
+    document.body.removeChild(ta);
+  }
+
+  function regenerateFrom(botMsgIndex) {
+    const chat = chats.find(c => c.id === currentChatId);
+    if (!chat) return;
+    let userIndex = -1;
+    for (let i = botMsgIndex - 1; i >= 0; i--) {
+      if (chat.messages[i] && chat.messages[i].role === 'user') {
+        userIndex = i;
+        break;
+      }
+    }
+    if (userIndex < 0) return;
+    const userText = chat.messages[userIndex].text;
+    chat.messages = chat.messages.slice(0, userIndex);
+    saveChats();
+    loadChat(currentChatId);
+    inputEl.value = userText;
+    setTimeout(() => send(), 50);
+  }
+
+  async function send() {
+    if (!isPhotoMode && cooldownUntil > Date.now()) {
+      const remaining = Math.ceil((cooldownUntil - Date.now()) / 1000);
+      showStatus(`Подожди ${remaining} сек.`, true);
+      return;
+    }
+
+    const text = inputEl.value.trim();
+    if (!text) return;
+
+    const chat = chats.find(c => c.id === currentChatId);
+    if (!chat) return;
+
+    if (isPhotoMode && Date.now() < imgCooldownUntil) {
+      const remaining = Math.ceil((imgCooldownUntil - Date.now()) / 1000);
+      showStatus(`Кулдаун фото не прошел. Жди ${remaining} сек.`, true);
+      return;
+    }
+
+    inputEl.value = '';
+    inputEl.style.height = 'auto';
+
+    if (chat.messages.length === 0) {
+      messagesEl.innerHTML = '';
+    }
+
+    chat.messages.push({ role: 'user', text: text });
+    updateChatTitle(text);
+    saveChats();
+
+    loadChat(currentChatId);
+
+    if (isPhotoMode) {
+      isPhotoMode = false;
+      photoBtn.classList.remove('active');
+      await generateImage(text, chat);
+    } else {
+      await generateText(text, chat);
+    }
+  }
+
+  // ===== ГЕНЕРАЦИЯ ТЕКСТА =====
+  async function generateText(text, chat) {
+    setSendButtonStop(true);
+
+    const row = document.createElement('div');
+    row.className = 'row bot';
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.textContent = 'H';
+    row.appendChild(avatar);
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+
+    const textContainer = document.createElement('div');
+    textContainer.className = 'text-content';
+
+    const typingIndicator = document.createElement('div');
+    typingIndicator.className = 'typing';
+    typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+    textContainer.appendChild(typingIndicator);
+
+    bubble.appendChild(textContainer);
+    row.appendChild(bubble);
+    messagesEl.appendChild(row);
+
+    showStatus("Думаю...");
+
+    const myChatId = currentChatId;
+    const myAbort = new AbortController();
+    currentAbort = myAbort;
+
+    let fullText = '';
+    let receivedFirstChunk = false;
+
+    try {
+      const history = chat.messages.map(m => ({ role: m.role, content: m.text }));
+
+      const onDelta = (delta) => {
+        if (!delta) return;
+        if (currentChatId !== myChatId) return;
+
+        if (!receivedFirstChunk) {
+          receivedFirstChunk = true;
+          hideStatus();
+          if (typingIndicator.parentNode) typingIndicator.remove();
+        }
+
+        fullText += delta;
+
+        const fenceCount = (fullText.match(/```/g) || []).length;
+        let visible;
+        if (fenceCount % 2 === 1) {
+          const lastFence = fullText.lastIndexOf('```');
+          visible = fullText.substring(0, lastFence);
+        } else {
+          visible = fullText;
+        }
+
+        renderRichText(textContainer, visible);
+        scrollDown();
+      };
+
+      if (selectedTextModel === 'mistral') {
+        await getMistralResponse(text, history, myAbort.signal, onDelta);
+      } else {
+        await streamPollinationsResponse(text, history, myAbort.signal, onDelta);
+      }
+
+      if (currentChatId !== myChatId) return;
+      if (typingIndicator.parentNode) typingIndicator.remove();
+
+      const answer = stripMarkdown(fullText);
+
+      if (!answer || !answer.trim()) {
+        row.remove();
+        addBotMessage('Сервер вернул пустой ответ. Попробуй ещё раз или смени модель в настройках.', null, null);
+        hideStatus();
+        currentAbort = null;
+        setSendButtonStop(false);
+        return;
+      }
+
+      renderRichText(textContainer, answer);
+
+      hideStatus();
+      currentAbort = null;
+      setSendButtonStop(false);
+
+      chat.messages.push({ role: 'assistant', text: answer });
+      saveChats();
+
+      const msgIndex = chat.messages.length - 1;
+      const actions = document.createElement('div');
+      actions.className = 'msg-actions';
+      const copyBtn = makeActionBtn('Копировать', () => copyToClipboard(answer, copyBtn, 'Копировать'));
+      actions.appendChild(copyBtn);
+      const regenBtn = makeActionBtn('Заново', () => regenerateFrom(msgIndex));
+      actions.appendChild(regenBtn);
+      bubble.appendChild(actions);
+
+      bubble.onclick = (e) => {
+        if (e.target.closest('button') || e.target.tagName === 'IMG') return;
+        actions.classList.toggle('visible');
+      };
+
+      scrollDown();
+
+    } catch (e) {
+      if (typingIndicator.parentNode) typingIndicator.remove();
+      hideStatus();
+      currentAbort = null;
+      setSendButtonStop(false);
+
+      if (e.name === 'AbortError') {
+        if (fullText.trim() && currentChatId === myChatId) {
+          const partial = stripMarkdown(fullText) + '\n\n[остановлено]';
+          renderRichText(textContainer, partial);
+          chat.messages.push({ role: 'assistant', text: stripMarkdown(fullText) });
+          saveChats();
+        } else {
+          row.remove();
+          if (currentChatId === myChatId) addBotMessage('Остановлено.', null, null);
+        }
+      } else if (e.message && e.message.startsWith('ЛИМИТ_')) {
+        row.remove();
+        const sec = parseInt(e.message.split('_')[1], 10) || 30;
+        startTextCooldown(sec);
+        if (currentChatId === myChatId) {
+          addBotMessage(`Лимит запросов. Подожди ${sec} сек.`, null, null);
+        }
+      } else {
+        row.remove();
+        if (currentChatId === myChatId) {
+          addBotMessage(`Ошибка: ${e.message}`, null, null);
+        }
+      }
+    }
+  }
+
+  // ===== POLLINATIONS (со стримингом и фолбэком) =====
+  async function streamPollinationsResponse(text, history, signal, onDelta) {
+    const recentHistory = history.slice(-12);
+
+    const systemContent =
+      "Ты — HHAI. Общайся как живой человек: просто, по делу, без канцелярита. " +
+      "Отвечай на русском. Не используй Markdown-разметку (**, *, #, таблицы). " +
+      "Списки — через дефис с новой строки. Не используй эмодзи. " +
+      "Не начинай с 'Конечно!', 'Отличный вопрос!' и подобного. " +
+      "Отвечай развёрнуто: обычно 2-4 абзаца или 4-8 пунктов списка, если тема требует объяснения. " +
+      "Коротко — только на простые фактические вопросы. " +
+      "Код — в блоке ``` с указанием языка. " +
+      "Ты не нарушаешь закон и не помогаешь нарушать его.";
+
+    const requestBody = {
+      model: "openai",
+      messages: [{ role: "system", content: systemContent }, ...recentHistory],
+      private: true
+    };
+
+    let gotChunk = false;
+    try {
+      const response = await fetch("https://text.pollinations.ai/openai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...requestBody, stream: true }),
+        signal
+      });
+
+      if (response.status === 429 || response.status === 402) {
+        const retryAfter = response.headers.get('Retry-After');
+        const waitSeconds = retryAfter ? parseInt(retryAfter, 10) : 30;
+        throw new Error(`ЛИМИТ_${waitSeconds}`);
+      }
+      if (!response.ok) throw new Error(`Сервер: ${response.status}`);
+
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content;
+        if (content) {
+          onDelta(content);
+          gotChunk = true;
+          return;
+        }
+        throw new Error('Пустой ответ');
+      }
+
+      await readSSEStream(response, (delta) => {
+        gotChunk = true;
+        onDelta(delta);
+      });
+
+    } catch (e) {
+      if (e.name === 'AbortError') throw e;
+      if (e.message && e.message.startsWith('ЛИМИТ_')) throw e;
+      if (gotChunk) throw e;
+    }
+
+    if (!gotChunk) {
+      const fallbackResp = await fetch("https://text.pollinations.ai/openai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+        signal
+      });
+
+      if (fallbackResp.status === 429 || fallbackResp.status === 402) {
+        throw new Error(`ЛИМИТ_30`);
+      }
+      if (!fallbackResp.ok) throw new Error(`Сервер: ${fallbackResp.status}`);
+
+      const data = await fallbackResp.json();
+      const content = data.choices?.[0]?.message?.content;
+      if (content) {
+        onDelta(content);
+      } else {
+        throw new Error('Пустой ответ от сервера');
+      }
+    }
+  }
+
+  // ===== MISTRAL: БЕЗ stream:true (CORS блокирует) =====
+  async function getMistralResponse(text, history, signal, onDelta) {
+    const recentHistory = history.slice(-8).map(m => ({
+      role: m.role === 'assistant' ? 'assistant' : 'user',
+      content: m.content || ''
+    }));
+
+    if (recentHistory.length === 0 || recentHistory[recentHistory.length - 1].content !== text) {
+      recentHistory.push({ role: 'user', content: text });
+    }
+
+    let response;
+    try {
+      response = await fetch("https://api.mistral.ai/v1/conversations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + MISTRAL_API_KEY
+        },
+        body: JSON.stringify({
+          agent_id: MISTRAL_AGENT_ID,
+          agent_version: 0,
+          inputs: recentHistory
+          // stream: true — НЕ ставим, Mistral блокирует браузерный стриминг через CORS
+        }),
+        signal
+      });
+    } catch (netErr) {
+      if (netErr.name === 'AbortError') throw netErr;
+      throw new Error('Сеть: Mistral недоступен (CORS или соединение). Переключись на Pollinations.');
+    }
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Mistral ${response.status}: ${errText.substring(0, 100)}`);
+    }
+
+    const data = await response.json();
+
+    let content = '';
+    if (data.outputs && data.outputs.length > 0) {
+      const lastOutput = data.outputs[data.outputs.length - 1];
+      content = lastOutput.content
+        || (lastOutput.message && lastOutput.message.content)
+        || '';
+    } else if (data.choices && data.choices.length > 0) {
+      content = data.choices[0].message?.content || '';
+    }
+
+    if (!content) throw new Error('Пустой ответ от Mistral');
+
+    onDelta(content);
+  }
+
+  // ===== SSE-РИДЕР =====
+  async function readSSEStream(response, onDelta, extractor) {
+    if (!response.body) throw new Error('Стриминг не поддерживается');
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+
+    const getDelta = extractor || ((json) => json.choices?.[0]?.delta?.content || '');
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split(/\r?\n/);
+      buffer = lines.pop();
+
+      for (const rawLine of lines) {
+        const line = rawLine.trim();
+        if (!line) continue;
+
+        let payload = null;
+        if (line.startsWith('data:')) {
+          payload = line.slice(5).trim();
+        } else if (line.startsWith('{')) {
+          payload = line;
+        }
+        if (!payload) continue;
+        if (payload === '[DONE]') return;
+
+        try {
+          const json = JSON.parse(payload);
+          const delta = getDelta(json);
+          if (delta) onDelta(delta);
+        } catch (e) { /* пропускаем */ }
+      }
+    }
+  }
+
+  function setSendButtonStop(stop) {
+    if (stop) {
+      sendBtn.classList.add('stop');
+      sendBtn.disabled = false;
+      sendBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>';
+      sendBtn.onclick = stopGeneration;
+    } else {
+      sendBtn.classList.remove('stop');
+      sendBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+      sendBtn.onclick = send;
+    }
+  }
+
+  function stopGeneration() {
+    if (currentAbort) {
+      currentAbort.abort();
+      currentAbort = null;
+    }
+    setSendButtonStop(false);
+  }
+
+  // ===== ГЕНЕРАЦИЯ ИЗОБРАЖЕНИЙ =====
+  async function generateImage(text, chat) {
+    setSendButtonStop(true);
+    imgCooldownUntil = Date.now() + IMG_COOLDOWN_MS;
+    updatePhotoBtnState();
+
+    const typing = document.createElement('div');
+    typing.className = 'row bot';
+    typing.innerHTML = '<div class="avatar">H</div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>';
+    messagesEl.appendChild(typing);
+    scrollDown();
+    showStatus("Создаю картинку... (может занять до 30 сек)");
+
+    const myChatId = currentChatId;
+
+    try {
+      const englishPrompt = await translatePrompt(text);
+      const url = generateImageUrl(englishPrompt);
+      await loadImage(url);
+
+      typing.remove();
+      hideStatus();
+      setSendButtonStop(false);
+
+      if (currentChatId !== myChatId) return;
+
+      chat.messages.push({ role: 'assistant', text: `Вот что получилось по запросу «${text}»:`, img: url });
+      saveChats();
+      addBotMessage(`Вот что получилось по запросу «${text}»:`, url, chat.messages.length - 1);
+      
+    } catch (e) {
+      typing.remove();
+      hideStatus();
+      setSendButtonStop(false);
+      
+      if (currentChatId !== myChatId) return;
+
+      addBotMessage(`Ошибка: ${e.message}`, null, null);
+      
+      imgCooldownUntil = 0;
+      updatePhotoBtnState();
+    }
+  }
+
+  function generateImageUrl(englishPrompt) {
+    let prompt = englishPrompt;
+    let model = selectedModel; 
+
+    const lower = englishPrompt.toLowerCase();
+    
+    if (lower.includes('flag') || lower.includes('флаг') || lower.includes('флаги')) {
+      if (lower.includes('russia') || lower.includes('russian') || lower.includes('росси') || lower.includes('рф')) {
+        prompt = 'the national flag of Russia, a rectangular banner with three equal horizontal stripes: white on top, blue in the middle, red on the bottom, waving on a flagpole, photorealistic, clear sky background';
+      } else if (lower.includes('usa') || lower.includes('american') || lower.includes('сша') || lower.includes('америк')) {
+        prompt = 'the national flag of the USA, stars and stripes, waving on a flagpole, photorealistic';
+      } else {
+        prompt = 'a national flag, ' + prompt + ', waving on a flagpole, photorealistic, detailed fabric texture';
+      }
+    } 
+    else if (lower.includes('dog') || lower.includes('puppy') || lower.includes('собак') || lower.includes('щен')) {
+      prompt = 'a cute dog with fur, four paws, a tail, floppy ears, ' + prompt;
+      prompt += ', natural lighting, sharp focus';
+    } 
+    else if (lower.includes('cat') || lower.includes('kitten') || lower.includes('kitty') || lower.includes('кот') || lower.includes('кошк')) {
+      prompt = 'a cute fluffy cat with detailed fur, whiskers, paws, tail, ' + prompt;
+      prompt += ', natural lighting, sharp focus';
+    } 
+    else {
+      prompt += ', natural lighting, sharp focus, high quality';
+    }
+
+    if (lower.includes('logo') || lower.includes('vector')) {
+      prompt += ', flat vector logo, minimalist, clean lines, solid white background, simple design, no text';
+    } else if (lower.includes('art') || lower.includes('anime') || lower.includes('drawing')) {
+      prompt += ', digital art, concept art, vivid colors, detailed';
+    }
+
+    return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&model=${model}&nologo=true&seed=${Math.floor(Math.random()*999999)}`;
+  }
+
+  function loadImage(url, timeout = 60000) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      let done = false;
+      const timer = setTimeout(() => { if (!done) { done = true; reject(new Error('Таймаут')); } }, timeout);
+      img.onload = () => { if (!done) { done = true; clearTimeout(timer); resolve(url); } };
+      img.onerror = () => { if (!done) { done = true; clearTimeout(timer); reject(new Error('Ошибка загрузки')); } };
+      img.src = url;
+    });
+  }
+
+  async function translatePrompt(text) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=en&dt=t&q=${encodeURIComponent(text)}`;
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) throw new Error('Translate failed');
+      const data = await response.json();
+      const translated = data[0].map(item => item[0]).join('');
+      return translated || text;
+    } catch (e) {
+      return text;
+    }
+  }
+
+  // ===== СТРИППЕР MARKDOWN =====
+  function stripMarkdown(text) {
+    const codeBlocks = [];
+    let tmp = text.replace(/```[\s\S]*?```/g, (m) => {
+      codeBlocks.push(m);
+      return `\u0000CODE${codeBlocks.length - 1}\u0000`;
+    });
+
+    tmp = tmp.replace(/^\s*\|(.+)\|\s*$/gm, (line) => {
+      const cells = line.split('|').map(c => c.trim()).filter(Boolean);
+      if (cells.every(c => /^:?-{2,}:?$/.test(c))) return '';
+      return cells.join(' — ');
+    });
+    tmp = tmp.replace(/\*\*(.+?)\*\*/g, '$1');
+    tmp = tmp.replace(/__(.+?)__/g, '$1');
+    tmp = tmp.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1$2');
+    tmp = tmp.replace(/(^|[^_])_([^_\n]+)_/g, '$1$2');
+    tmp = tmp.replace(/^\s{0,3}#{1,6}\s+/gm, '');
+    tmp = tmp.replace(/^\s*([-*_])\1{2,}\s*$/gm, '');
+    tmp = tmp.replace(/`([^`\n]+)`/g, '$1');
+    tmp = tmp.replace(/\n{3,}/g, '\n\n');
+
+    tmp = tmp.replace(/\u0000CODE(\d+)\u0000/g, (_, i) => codeBlocks[parseInt(i, 10)]);
+
+    return tmp.trim();
+  }
+
+  // ===== LIGHTBOX =====
   let currentImageSrc = '';
-  function openLightbox(src) { currentImageSrc = src; lightboxImg.src = src; lightbox.classList.add('show'); }
+  function openLightbox(src) {
+    currentImageSrc = src;
+    lightboxImg.src = src;
+    lightbox.classList.add('show');
+  }
   function closeLightbox() { lightbox.classList.remove('show'); }
   lightboxClose.onclick = closeLightbox;
   lightbox.onclick = (e) => { if (e.target === lightbox) closeLightbox(); };
@@ -1014,335 +1719,28 @@
       a.click();
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-    } catch (e) { window.open(currentImageSrc, '_blank'); }
+    } catch (e) {
+      window.open(currentImageSrc, '_blank');
+    }
     downloadBtn.textContent = 'Скачать';
     downloadBtn.disabled = false;
     closeLightbox();
   };
 
-  function generateImageUrl(englishPrompt) {
-    let style = 'real';
-    let prompt = englishPrompt;
-    let negative = '';
-    let model = 'flux';
-
-    if (englishPrompt.includes('logo') || englishPrompt.includes('vector')) {
-      style = 'logo';
-    } else if (englishPrompt.includes('art') || englishPrompt.includes('anime') || englishPrompt.includes('drawing')) {
-      style = 'art';
-    }
-
-    if (style === 'real') {
-      prompt += ', realistic photo, natural lighting, 50mm lens, sharp focus, high quality';
-      negative = 'ugly, deformed, blurry, low quality, bad anatomy, extra limbs, watermark, text, signature, cartoon, drawing, illustration';
-    } else if (style === 'art') {
-      prompt += ', digital art, concept art, trending on artstation, vivid colors, detailed';
-      negative = 'ugly, deformed, blurry, low quality, bad anatomy, extra limbs, watermark, text, signature, photo, realistic';
-    } else if (style === 'logo') {
-      model = 'turbo'; 
-      prompt += ', flat vector logo, minimalist, clean lines, solid white background, simple design, corporate identity, icon design, no text, high contrast';
-      negative = 'realistic, photo, 3d, gradients, complex background, texture, ugly, deformed, blurry, low quality, bad anatomy, extra limbs, watermark, text, signature, letters, words, messy, cluttered';
-    }
-
-    const encoded = encodeURIComponent(prompt);
-    const negEncoded = encodeURIComponent(negative);
-    return `https://image.pollinations.ai/prompt/${encoded}?width=1024&height=1024&model=${model}&nologo=true&negative_prompt=${negEncoded}&seed=${Math.floor(Math.random()*999999)}`;
-  }
-
-  function loadImage(url, timeout = 60000) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      let done = false;
-      const timer = setTimeout(() => { if (!done) { done = true; reject(new Error('Таймаут')); } }, timeout);
-      img.onload = () => { if (!done) { done = true; clearTimeout(timer); resolve(url); } };
-      img.onerror = () => { if (!done) { done = true; clearTimeout(timer); reject(new Error('Ошибка')); } };
-      img.src = url;
-    });
-  }
-
-  async function translatePrompt(text) {
-    try {
-      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=en&dt=t&q=${encodeURIComponent(text)}`;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Translate failed');
-      const data = await response.json();
-      return data[0].map(item => item[0]).join('');
-    } catch (e) { return text; }
-  }
-
-  // ===== Запрос к API =====
-  async function getChatResponse(text, history) {
-    const recentHistory = history.slice(-10);
-    
-    let systemContent = "Ты — HHAI, умный и дружелюбный помощник. Отвечай на русском языке. Используй эмодзи. ";
-    
-    if (currentAge === '12') {
-      systemContent += "Ты работаешь в режиме 12+. Твоя главная задача — ПОМОГАТЬ пользователю учиться и понимать, а не давать готовые ответы. Если пользователь просит решить домашнее задание, уравнение или пример: НЕ давай готовый ответ. Вместо этого объясни принцип решения, задай наводящий вопрос, предложи шаги. Ты не должен осуждать пользователя или давать опасные советы.";
-    } else {
-      systemContent += "Ты работаешь в режиме 18+. Ты можешь обсуждать любые темы без цензуры, решать любые задачи. Но не нарушай законы.";
-    }
-
-    const systemPrompt = { role: "system", content: systemContent };
-    const apiKey = getApiKey();
-
-    // Анонимный режим (без ключа)
-    if (!apiKey || currentServer === 'anon') {
-      const now = Date.now();
-      if (now < anonCooldownUntil) {
-        const remaining = Math.ceil((anonCooldownUntil - now) / 1000);
-        throw new Error(`Анонимный лимит: подожди ${remaining} секунд.`);
-      }
-      
-      const body = {
-        messages: [systemPrompt, ...recentHistory],
-        private: true,
-        model: "openai"
-      };
-      
-      const response = await fetch("https://text.pollinations.ai/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      });
-      
-      if (response.status === 429) {
-        throw new Error("Анонимный лимит: подожди 30 секунд.");
-      }
-      if (!response.ok) throw new Error(`Анонимный сервер: ${response.status}`);
-      
-      anonCooldownUntil = Date.now() + 30000;
-      
-      return await response.text();
-    }
-
-    // С ключом
-    if (currentServer === 'gen') {
-      const body = {
-        model: useSearch ? "searchgpt" : (useReasoning ? "openai-reasoning" : "openai"),
-        messages: [systemPrompt, ...recentHistory],
-        private: true
-      };
-      const response = await fetch("https://gen.pollinations.ai/v1/chat/completions", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + apiKey
-        },
-        body: JSON.stringify(body)
-      });
-      if (!response.ok) throw new Error(`Gen сервер: ${response.status}`);
-      const data = await response.json();
-      return data.choices[0].message.content;
-      
-    } else if (currentServer === 'text') {
-      const body = {
-        messages: [systemPrompt, ...recentHistory],
-        private: true,
-        model: "openai"
-      };
-      if (useSearch) body.web_search = true;
-      if (useReasoning) body.reasoning = true;
-      
-      const response = await fetch("https://text.pollinations.ai/", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + apiKey
-        },
-        body: JSON.stringify(body)
-      });
-      if (!response.ok) throw new Error(`Стандартный сервер: ${response.status}`);
-      return await response.text();
-    }
-
-    // fallback
-    throw new Error("Неизвестный сервер");
-  }
-
-  function detectIntent(text) {
-    const lower = text.toLowerCase();
-    const imgKeywords = [
-      'нарисуй', 'сгенерируй', 'создай фото', 'сделай фото', 'покажи фото',
-      'картинку', 'изображение', 'нарисуй мне', 'сгенерируй картинку',
-      'draw', 'generate image', 'create image', 'logo', 'логотип'
-    ];
-    for (const kw of imgKeywords) {
-      if (lower.includes(kw)) return 'image';
-    }
-    return 'text';
-  }
-
-  // ===== Усиленный возрастной фильтр =====
-  function isTaskRequest(text) {
-    const patterns = [
-      /реш(и|ите|ить|аю|ай)/i,
-      /вычисл(и|ите|ить)/i,
-      /посчита(й|йте|ть)/i,
-      /найд(и|ите|ти)\s+(ответ|значени|корень|x|икс)/i,
-      /уравнени/i,
-      /задач(а|у|и|ей)/i,
-      /пример(ы|ов|у)?\b/i,
-      /домашн/i,
-      /сколько\s+(будет|равно)/i,
-      /\d+\s*[+\-*/^=]\s*\d+/,
-      /[a-z]\s*[+\-*/=]\s*\d+/i,
-      /найди\s+[a-zх]/i,
-      /help\s+me\s+(solve|with)/i,
-      /solve\s+(for|the|this)/i,
-    ];
-    return patterns.some(re => re.test(text));
-  }
-
-  function looksLikeDirectAnswer(botText) {
-    const hasEquation = /\d+\s*[+\-*/=]\s*\d+\s*=\s*\d+/.test(botText);
-    const hasFinalAnswer = /(ответ|итог|получаем|получится|равно)\s*[:=]?\s*-?\d+/i.test(botText);
-    const isShort = botText.trim().length < 120;
-    return (hasEquation || hasFinalAnswer) && isShort;
-  }
-
-  function enforceAgePolicy(userText, botText) {
-    if (currentAge !== '12') return botText;
-    if (!isTaskRequest(userText)) return botText;
-
-    if (looksLikeDirectAnswer(botText)) {
-      return "В режиме 12+ я не решаю за тебя, а помогаю разобраться. " +
-             "Давай по шагам: что известно в задаче и что нужно найти? " +
-             "Напиши, что ты уже пробовал — и я подскажу следующий шаг.";
-    }
-
-    if (/(ответ|итог)\s*[:=]\s*-?\d+/i.test(botText)) {
-      return botText.replace(
-        /(ответ|итог)\s*[:=]\s*-?\d+[\d.,]*/gi,
-        "финальный ответ предлагаю получить самому — покажи свои шаги, и я проверю"
-      );
-    }
-
-    return botText;
-  }
-
-  async function send() {
-    const text = inputEl.value.trim();
-    if (!text) return;
-
-    const chat = chats.find(c => c.id === currentChatId);
-    if (!chat) return;
-
-    const intent = detectIntent(text);
-    const isImageRequest = intent === 'image';
-
-    if (isImageRequest && imgCooldownUntil > Date.now()) {
-      const remaining = Math.ceil((imgCooldownUntil - Date.now()) / 1000);
-      addBotMessage(`Подожди ещё ${remaining} сек. перед новой картинкой.`);
-      return;
-    }
-
-    addUserMessage(text);
-    chat.messages.push({ role: 'user', text: text });
-    updateChatTitle(text);
-    
-    inputEl.value = '';
-    inputEl.style.height = 'auto';
-    sendBtn.disabled = true;
-
-    if (isImageRequest) {
-      const typing = document.createElement('div');
-      typing.className = 'row bot';
-      typing.innerHTML = '<div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>';
-      messagesEl.appendChild(typing);
-      scrollDown();
-      
-      showStatus("Создаю картинку...");
-
-      try {
-        const englishPrompt = await translatePrompt(text);
-        const url = generateImageUrl(englishPrompt);
-        await loadImage(url);
-        
-        typing.remove();
-        hideStatus();
-        
-        addBotMessage(`Вот что получилось по запросу «${text}»:`, url);
-        chat.messages.push({ role: 'assistant', text: `Вот что получилось по запросу «${text}»:`, img: url });
-        saveChats();
-        
-        imgCooldownUntil = Date.now() + IMG_COOLDOWN_MS;
-        if (cooldownInterval) clearManagedInterval(cooldownInterval);
-        cooldownInterval = setManagedInterval(() => {
-          if (Date.now() >= imgCooldownUntil) {
-            clearManagedInterval(cooldownInterval);
-            cooldownInterval = null;
-            sendBtn.disabled = false;
-          }
-        }, 250);
-        
-      } catch (e) {
-        typing.remove();
-        hideStatus();
-        addBotMessage(`Ошибка: ${e.message}`);
-        sendBtn.disabled = false;
-      }
-    } else {
-      const typing = document.createElement('div');
-      typing.className = 'row bot';
-      typing.innerHTML = '<div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>';
-      messagesEl.appendChild(typing);
-      scrollDown();
-      showStatus("Думаю...");
-
-      try {
-        const history = chat.messages.map(m => ({ role: m.role, content: m.text }));
-        let answer = await getChatResponse(text, history);
-        
-        answer = enforceAgePolicy(text, answer);
-        
-        typing.remove();
-        hideStatus();
-        
-        chat.messages.push({ role: 'assistant', text: answer });
-        saveChats();
-
-        const row = document.createElement('div');
-        row.className = 'row bot';
-        const b = document.createElement('div');
-        b.className = 'bubble';
-        
-        const tag = document.createElement('div');
-        tag.className = 'model-tag';
-        tag.textContent = 'HHAI';
-        b.appendChild(tag);
-        
-        const textContainer = document.createElement('div');
-        textContainer.className = 'text-content';
-        renderRichText(textContainer, answer);
-        b.appendChild(textContainer);
-        b.appendChild(createMsgCopyBtn(answer));
-        
-        row.appendChild(b);
-        messagesEl.appendChild(row);
-        scrollDown();
-      } catch (e) {
-        typing.remove();
-        hideStatus();
-        addBotMessage(`Ошибка: ${e.message}`);
-      }
-      sendBtn.disabled = false;
-      inputEl.focus();
-    }
-  }
-
   sendBtn.onclick = send;
-  clearBtn.onclick = createNewChat;
 
   inputEl.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
   });
   inputEl.addEventListener('input', function() {
     inputEl.style.height = 'auto';
-    inputEl.style.height = Math.min(inputEl.scrollHeight, 100) + 'px';
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
   });
 
   init();
-
 })();
 </script>
 
